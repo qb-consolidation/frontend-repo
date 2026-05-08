@@ -1,4 +1,4 @@
-import MobileTelegramUploader from "./components/MobileTelegramUploader";
+import MobileTelegramUploader from "./components/MobileTelegramUploader.jsx";
 
 export default function App() {
   return <MobileTelegramUploader />;
