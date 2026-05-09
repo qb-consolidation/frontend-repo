@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Loader2, Image as ImageIcon, Send, X } from "lucide-react";
 
 const API_URL =
@@ -9,10 +10,13 @@ export default function MobileTelegramUploader() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState({ type: "", text: "" });
   const inputRef = useRef(null);
 
-  const isVideo = useMemo(() => file?.type?.startsWith("video/"), [file]);
+  const isVideo = useMemo(
+    () => file?.type?.startsWith("video/"),
+    [file]
+  );
 
   const onFileChange = (e) => {
     const f = e.target.files?.[0];
@@ -22,6 +26,7 @@ export default function MobileTelegramUploader() {
 
     setFile(f);
     setPreview(URL.createObjectURL(f));
+    setStatus({ type: "", text: "" });
   };
 
   const clearFile = () => {
@@ -34,183 +39,143 @@ export default function MobileTelegramUploader() {
   const submit = async (e) => {
     e.preventDefault();
 
-    if (!message && !file) {
-      setStatus("Xabar yoki file tanlang");
+    if (!message.trim() && !file) {
+      setStatus({ type: "error", text: "Xabar yoki media tanlang" });
       return;
     }
 
     try {
       setLoading(true);
-      setStatus("");
+      setStatus({ type: "", text: "" });
 
-      const fd = new FormData();
-      fd.append("message", message);
-      if (file) fd.append("file", file);
+      const formData = new FormData();
+      formData.append("message", message.trim());
+      if (file) formData.append("file", file);
 
       const res = await fetch(API_URL, {
         method: "POST",
-        body: fd,
+        body: formData,
       });
 
-      if (!res.ok) throw new Error("Xatolik");
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data?.message || "Server xatosi");
 
       setMessage("");
       clearFile();
-      setStatus("Yuborildi ✅");
-    } catch (e) {
-      setStatus("Xatolik ❌");
+      setStatus({ type: "success", text: "Telegramga yuborildi ✅" });
+    } catch (err) {
+      setStatus({ type: "error", text: err.message });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Quick Sender</h2>
-        <p style={styles.subtitle}>Telegram upload tool</p>
+    <div className="min-h-screen flex items-center justify-center px-4 py-6 text-white bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.25),transparent_35%),linear-gradient(180deg,#020617_0%,#0f172a_45%,#020617_100%)]">
+      
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-sm rounded-[30px] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_40px_120px_rgba(0,0,0,0.7)] overflow-hidden"
+      >
+        {/* HEADER */}
+        <div className="p-5 pb-3">
+          <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-5" />
 
-        <form onSubmit={submit} style={styles.form}>
+          <h1 className="text-[22px] font-semibold tracking-tight">
+            Quick Sender
+          </h1>
+
+          <p className="text-sm text-slate-400 mt-1">
+            Secure Telegram upload interface
+          </p>
+        </div>
+
+        {/* FORM */}
+        <form onSubmit={submit} className="p-5 pt-2 space-y-4">
+
+          {/* TEXTAREA */}
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Xabar yozing..."
-            style={styles.textarea}
+            placeholder="Xabaringizni yozing..."
+            className="w-full h-28 rounded-2xl bg-white/5 border border-white/10 p-4 text-sm outline-none resize-none placeholder:text-slate-500 focus:border-blue-400/40 transition"
           />
 
-          <label style={styles.uploadBox}>
+          {/* FILE INPUT */}
+          <label className="flex items-center gap-2 p-4 rounded-2xl border border-dashed border-white/15 bg-white/5 cursor-pointer hover:bg-white/10 transition">
             <ImageIcon size={16} />
-            <span style={{ marginLeft: 8 }}>Rasm / Video tanlash</span>
+            <span className="text-sm text-slate-300">
+              Rasm yoki video tanlang
+            </span>
+
             <input
               ref={inputRef}
               type="file"
               accept="image/*,video/*"
+              className="hidden"
               onChange={onFileChange}
-              style={{ display: "none" }}
             />
           </label>
 
+          {/* PREVIEW */}
           {preview && (
-            <div style={styles.previewBox}>
+            <div className="relative rounded-2xl overflow-hidden border border-white/10">
               {isVideo ? (
-                <video src={preview} controls style={styles.media} />
+                <video src={preview} controls className="w-full max-h-64" />
               ) : (
-                <img src={preview} style={styles.media} />
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="w-full max-h-64 object-cover"
+                />
               )}
 
-              <button type="button" onClick={clearFile} style={styles.close}>
+              <button
+                type="button"
+                onClick={clearFile}
+                className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"
+              >
                 <X size={14} />
               </button>
             </div>
           )}
 
-          {status && <div style={styles.status}>{status}</div>}
+          {/* STATUS */}
+          {status.text && (
+            <div
+              className={`text-sm px-4 py-3 rounded-xl border ${
+                status.type === "success"
+                  ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                  : "bg-red-500/10 text-red-300 border-red-500/20"
+              }`}
+            >
+              {status.text}
+            </div>
+          )}
 
-          <button type="submit" disabled={loading} style={styles.button}>
+          {/* BUTTON */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-2xl py-3 bg-white text-black font-medium flex items-center justify-center gap-2 shadow-[0_10px_40px_rgba(255,255,255,0.15)] active:scale-[0.99] transition disabled:opacity-60"
+          >
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={16} /> Yuborilmoqda
+                <Loader2 className="animate-spin" size={16} />
+                Yuborilmoqda...
               </>
             ) : (
               <>
-                <Send size={16} /> Yuborish
+                <Send size={16} />
+                Yuborish
               </>
             )}
           </button>
+
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
-
-/* ================= STYLES ================= */
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "linear-gradient(180deg,#020617,#0f172a,#020617)",
-    padding: 16,
-  },
-  card: {
-    width: "100%",
-    maxWidth: 420,
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 24,
-    padding: 18,
-    backdropFilter: "blur(20px)",
-    color: "white",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 600,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    opacity: 0.7,
-    marginBottom: 16,
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-  textarea: {
-    width: "100%",
-    height: 110,
-    borderRadius: 16,
-    padding: 12,
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    color: "white",
-    outline: "none",
-  },
-  uploadBox: {
-    display: "flex",
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 16,
-    border: "1px dashed rgba(255,255,255,0.2)",
-    cursor: "pointer",
-    fontSize: 13,
-    opacity: 0.8,
-  },
-  previewBox: {
-    position: "relative",
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  media: {
-    width: "100%",
-    maxHeight: 260,
-    objectFit: "cover",
-  },
-  close: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    background: "rgba(0,0,0,0.6)",
-    border: "none",
-    borderRadius: 20,
-    color: "white",
-    padding: 6,
-    cursor: "pointer",
-  },
-  status: {
-    fontSize: 13,
-    opacity: 0.8,
-  },
-  button: {
-    padding: 12,
-    borderRadius: 16,
-    border: "none",
-    background: "white",
-    color: "black",
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-};
