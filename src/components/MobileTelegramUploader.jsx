@@ -74,10 +74,10 @@ export default function MobileTelegramUploader() {
         formData.append("file", file);
       }
 
-      const res = await fetch("/api/send-to-telegram", {
-        method: "POST",
-        body: formData
-      });
+const res = await fetch("https://tg-sender-production.up.railway.app/api/send-to-telegram", {
+  method: "POST",
+  body: formData
+});
 
       const data = await res.json().catch(() => ({}));
 
