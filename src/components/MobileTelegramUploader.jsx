@@ -43,10 +43,7 @@ export default function MobileTelegramUploader() {
     if (preview) URL.revokeObjectURL(preview);
     setFile(null);
     setPreview(null);
-
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   const resetForm = () => {
@@ -74,10 +71,13 @@ export default function MobileTelegramUploader() {
         formData.append("file", file);
       }
 
-const res = await fetch("https://tg-sender-production.up.railway.app/api/send-to-telegram", {
-  method: "POST",
-  body: formData
-});
+      const res = await fetch(
+        "https://tg-sender-production.up.railway.app/api/send-to-telegram",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
 
       const data = await res.json().catch(() => ({}));
 
@@ -95,107 +95,116 @@ const res = await fetch("https://tg-sender-production.up.railway.app/api/send-to
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white px-4 py-6 flex items-center justify-center">
+    <div className="min-h-screen px-4 py-6 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(96,165,250,0.22),transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_45%,#020617_100%)] text-white">
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl p-5"
+        className="relative w-full max-w-sm rounded-[2.4rem] border border-white/10 bg-white/[0.06] backdrop-blur-2xl shadow-[0_30px_80px_rgba(0,0,0,0.55)] overflow-hidden"
       >
-        <div className="mb-5">
-          <h1 className="text-2xl font-semibold">Quick Sender</h1>
-          <p className="text-sm text-slate-300">
-            Privacy-safe Telegram uploader
-          </p>
-        </div>
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
 
-        <form
-          key={formKey}
-          onSubmit={handleSubmit}
-          autoComplete="off"
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
-          className="space-y-4"
-          onPaste={(e) => e.preventDefault()}
-        >
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Xabaringizni yozing..."
-            name="secure_msg_field_x9"
-            autoComplete="new-password"
-            inputMode="text"
-            className="w-full h-32 rounded-3xl bg-white/5 border border-white/10 p-4 text-sm outline-none focus:border-white/30 resize-none"
-          />
+        <div className="relative px-5 pt-6 pb-5">
+          <div className="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-5" />
 
-          <label className="block rounded-3xl border border-dashed border-white/15 bg-white/5 p-4 cursor-pointer active:scale-[0.995] transition">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <ImageIcon size={16} />
-              <span>Rasm yoki video tanlang</span>
-            </div>
+          <div className="mb-5">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
+              Private Upload
+            </p>
 
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*,video/*"
-              className="hidden"
-              autoComplete="off"
-              onChange={handleFileChange}
-            />
-          </label>
+            <h1 className="text-[1.7rem] leading-tight font-semibold tracking-tight mt-1">
+              Quick Sender
+            </h1>
 
-          {preview && (
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/20">
-              {isVideo ? (
-                <video src={preview} controls className="w-full max-h-64" />
-              ) : (
-                <img
-                  src={preview}
-                  alt="preview"
-                  className="w-full max-h-64"
-                />
-              )}
+            <p className="text-sm text-slate-400 mt-1">
+              Fast, clean and secure Telegram delivery
+            </p>
+          </div>
 
-              <button
-                type="button"
-                onClick={clearFile}
-                className="absolute top-2 right-2 bg-black/60 p-2 rounded-full"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-
-          {status.text && (
-            <div
-              className={`text-sm px-4 py-3 rounded-2xl border ${
-                status.type === "success"
-                  ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-                  : "bg-red-500/10 text-red-300 border-red-500/20"
-              }`}
-            >
-              {status.text}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-3xl py-3 bg-white text-black font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+          <form
+            key={formKey}
+            onSubmit={handleSubmit}
+            autoComplete="off"
+            spellCheck={false}
+            autoCorrect="off"
+            autoCapitalize="off"
+            className="space-y-4"
           >
-            {submitting ? (
-              <>
-                <Loader2 className="animate-spin" size={16} />
-                Yuborilmoqda...
-              </>
-            ) : (
-              <>
-                <Send size={16} />
-                Yuborish
-              </>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Xabaringizni yozing..."
+              autoComplete="new-password"
+              className="w-full h-32 rounded-[1.7rem] bg-white/[0.045] border border-white/10 px-4 py-4 text-sm outline-none resize-none placeholder:text-slate-500 focus:border-blue-400/40 focus:bg-white/[0.06] transition"
+            />
+
+            <label className="block rounded-[1.7rem] border border-dashed border-white/15 bg-white/[0.04] px-4 py-4 cursor-pointer transition hover:bg-white/[0.06]">
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <Image as ImageIcon size={16} />
+                <span>Rasm yoki video tanlang</span>
+              </div>
+
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*,video/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </label>
+
+            {preview && (
+              <div className="relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-black/20">
+                {isVideo ? (
+                  <video src={preview} controls className="w-full max-h-72" />
+                ) : (
+                  <img
+                    src={preview}
+                    alt="preview"
+                    className="w-full max-h-72 object-cover"
+                  />
+                )}
+
+                <button
+                  type="button"
+                  onClick={clearFile}
+                  className="absolute top-3 right-3 bg-black/50 backdrop-blur-xl p-2 rounded-full"
+                >
+                  <X size={15} />
+                </button>
+              </div>
             )}
-          </button>
-        </form>
+
+            {status.text && (
+              <div
+                className={`text-sm px-4 py-3 rounded-[1.3rem] border ${
+                  status.type === "success"
+                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-300 border-red-500/20"
+                }`}
+              >
+                {status.text}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-[1.6rem] py-3.5 bg-white text-black font-medium flex items-center justify-center gap-2 disabled:opacity-60 transition active:scale-[0.99] shadow-[0_10px_30px_rgba(255,255,255,0.12)]"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  Yuborilmoqda...
+                </>
+              ) : (
+                <>
+                  <Send size={16} />
+                  Yuborish
+                </>
+              )}
+            </button>
+          </form>
+        </div>
       </motion.div>
     </div>
   );
