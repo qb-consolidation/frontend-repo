@@ -95,8 +95,14 @@ export default function MobileTelegramUploader() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-6 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(96,165,250,0.22),transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_45%,#020617_100%)] text-white">
-      <motion.div
+   <div
+  className="min-h-screen px-4 py-6 flex items-center justify-center text-white"
+  style={{
+    background:
+      "linear-gradient(180deg, #020617 0%, #0f172a 45%, #020617 100%)"
+  }}
+>
+    <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-sm rounded-[2.4rem] border border-white/10 bg-white/[0.06] backdrop-blur-2xl shadow-[0_30px_80px_rgba(0,0,0,0.55)] overflow-hidden"
